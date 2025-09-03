@@ -1,0 +1,31 @@
+---
+// Navbar.astro
+// Minimal, accessible navbar that works without JS.
+// Import the navbar-specific stylesheet here so styles stay modular.
+import "../styles/navbar.css";
+---
+<nav class="site-nav" role="navigation" aria-label="Main navigation">
+  <a class="site-logo" href="/">Sugarfox Media</a>
+
+  <!-- Mobile toggle using details/summary for accessibility (no JS) -->
+  <details class="nav-toggle" aria-hidden="false">
+    <summary class="nav-toggle-summary" aria-label="Open menu">Menu</summary>
+
+    <ul class="nav-list nav-list-mobile">
+      <li><a href="/">Home</a></li>
+      <li><a href="/about">About</a></li>
+      <li><a href="/portfolio">Portfolio</a></li>
+      <li><a href="/contact" class="cta">Contact</a></li>
+    </ul>
+  </details>
+
+  <!-- Desktop links -->
+  <ul class="nav-list nav-list-desktop" role="menubar">
+    <li role="none"><a role="menuitem" href="/">Home</a></li>
+    <li role="none"><a role="menuitem" href="/about">About</a></li>
+    <li role="none"><a role="menuitem" href="/portfolio">Portfolio</a></li>
+    <li role="none"><a role="menuitem" href="/contact" class="cta">Contact</a></li>
+  </ul>
+  <button class="theme-toggle" id="theme-toggle">☾</button>
+  <script src="/theme-toggle.js" is:inline></script>
+</nav>
