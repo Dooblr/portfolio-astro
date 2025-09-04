@@ -1,561 +1,517 @@
-<!DOCTYPE html>
+<!-- src/components/Hero.astro -->
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Hero with Interactive Cube</title>
     <style>
-        /* Variables */
-        :root {
-            --nav-height: 64px;
-            --gap: 1rem;
-            
-            /* Light mode */
-            --bg: #ffffff;
-            --text: #111111;
-            --muted: #555555;
-            --border: #e5e5e5;
-            --card-bg: #fafafa;
-            
-            /* Accent purely black/white */
-            --accent: #000000;
-            --cta-bg: #000000;
-            --cta-text: #ffffff;
-            
-            --radius: 10px;
-            --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
+      /* Variables */
+      :root {
+        --nav-height: 64px;
+        --gap: 1rem;
 
-        /* Dark mode overrides */
-        [data-theme="dark"] {
-            --bg: #111111;
-            --text: #f5f5f5;
-            --muted: #aaaaaa;
-            --border: #333333;
-            --card-bg: #1a1a1a;
-            --accent: #ffffff;
-            --cta-bg: #ffffff;
-            --cta-text: #111111;
-            --shadow: 0 2px 10px rgba(255, 255, 255, 0.1);
-        }
+        /* Light mode */
+        --bg: #ffffff;
+        --text: #111111;
+        --muted: #555555;
+        --border: #e5e5e5;
+        --card-bg: #fafafa;
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        /* Accent purely black/white */
+        --accent: #000000;
+        --cta-bg: #000000;
+        --cta-text: #ffffff;
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            transition: background 0.3s ease, color 0.3s ease;
-        }
+        --radius: 10px;
+        --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
 
-        .button {
-            background: var(--cta-bg);
-            color: var(--cta-text);
-            padding: 0.8rem 1.5rem;
-            border-radius: var(--radius);
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.2s ease;
-            border: 2px solid var(--accent);
-            display: inline-block;
-            cursor: pointer;
-            font-size: 1rem;
-        }
+      /* Dark mode overrides */
+      [data-theme="dark"] {
+        --bg: #111111;
+        --text: #f5f5f5;
+        --muted: #aaaaaa;
+        --border: #333333;
+        --card-bg: #1a1a1a;
+        --accent: #ffffff;
+        --cta-bg: #ffffff;
+        --cta-text: #111111;
+        --shadow: 0 2px 10px rgba(255, 255, 255, 0.1);
+      }
 
-        .button:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow);
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-        .button-outline {
-            background: transparent;
-            color: var(--text);
-            border: 2px solid var(--border);
-        }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+        transition:
+          background 0.3s ease,
+          color 0.3s ease;
+      }
 
-        .button-outline:hover {
-            background: var(--border);
-        }
+      .button {
+        background: var(--cta-bg);
+        color: var(--cta-text);
+        padding: 0.8rem 1.5rem;
+        border-radius: var(--radius);
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        border: 2px solid var(--accent);
+        display: inline-block;
+        cursor: pointer;
+        font-size: 1rem;
+      }
 
-        /* Hero Section */
+      .button:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow);
+      }
+
+      .button-outline {
+        background: transparent;
+        color: var(--text);
+        border: 2px solid var(--border);
+      }
+
+      .button-outline:hover {
+        background: var(--border);
+      }
+
+      /* Hero Section */
+      .hero {
+        position: relative;
+        text-align: center;
+        padding: 4rem 2rem;
+        max-width: 800px;
+        margin: 0 auto;
+        min-height: 80vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+
+      /* Ethereal background strands */
+      .ethereal-background {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+        pointer-events: none;
+      }
+
+      .light-strand {
+        position: absolute;
+        background: linear-gradient(
+          45deg,
+          rgba(255, 255, 255, 0.02) 0%,
+          rgba(255, 255, 255, 0.08) 25%,
+          rgba(255, 255, 255, 0.15) 50%,
+          rgba(255, 255, 255, 0.08) 75%,
+          rgba(255, 255, 255, 0.02) 100%
+        );
+        border-radius: 50px;
+        filter: blur(1px);
+      }
+
+      .strand-1 {
+        width: 300px;
+        height: 2px;
+        top: 20%;
+        left: -20%;
+        animation: drift-1 25s infinite ease-in-out;
+        opacity: 0.6;
+      }
+
+      .strand-2 {
+        width: 400px;
+        height: 1px;
+        top: 40%;
+        left: -15%;
+        animation: drift-2 30s infinite ease-in-out;
+        opacity: 0.4;
+        animation-delay: -5s;
+      }
+
+      .strand-3 {
+        width: 250px;
+        height: 3px;
+        top: 60%;
+        left: -10%;
+        animation: drift-3 35s infinite ease-in-out;
+        opacity: 0.3;
+        animation-delay: -10s;
+      }
+
+      @keyframes drift-1 {
+        0%,
+        100% {
+          transform: translateX(0) translateY(0) rotate(0deg);
+          opacity: 0.6;
+        }
+        25% {
+          transform: translateX(150px) translateY(-30px) rotate(5deg);
+          opacity: 0.8;
+        }
+        50% {
+          transform: translateX(300px) translateY(20px) rotate(-3deg);
+          opacity: 0.4;
+        }
+        75% {
+          transform: translateX(450px) translateY(-10px) rotate(2deg);
+          opacity: 0.7;
+        }
+      }
+
+      @keyframes drift-2 {
+        0%,
+        100% {
+          transform: translateX(0) translateY(0) rotate(2deg);
+          opacity: 0.4;
+        }
+        33% {
+          transform: translateX(200px) translateY(40px) rotate(-4deg);
+          opacity: 0.6;
+        }
+        66% {
+          transform: translateX(400px) translateY(-20px) rotate(1deg);
+          opacity: 0.3;
+        }
+      }
+
+      @keyframes drift-3 {
+        0%,
+        100% {
+          transform: translateX(0) translateY(0) rotate(-1deg);
+          opacity: 0.3;
+        }
+        20% {
+          transform: translateX(100px) translateY(25px) rotate(3deg);
+          opacity: 0.5;
+        }
+        40% {
+          transform: translateX(250px) translateY(-15px) rotate(-2deg);
+          opacity: 0.7;
+        }
+        60% {
+          transform: translateX(350px) translateY(35px) rotate(4deg);
+          opacity: 0.4;
+        }
+        80% {
+          transform: translateX(480px) translateY(-25px) rotate(-1deg);
+          opacity: 0.6;
+        }
+      }
+
+      /* Hero content structure */
+      .hero-content {
+        position: relative;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        max-width: 600px;
+      }
+
+      .hero-title {
+        font-size: 3rem;
+        font-weight: 800;
+        margin-bottom: 2rem;
+        letter-spacing: -0.02em;
+        color: var(--text);
+      }
+
+      /* Three.js container positioned between title and description */
+      .three-container {
+        width: 350px;
+        height: 200px;
+        margin: 1rem 0 2rem 0;
+        position: relative;
+        z-index: 5;
+      }
+
+      .three-container canvas {
+        display: block;
+        width: 100% !important;
+        height: 100% !important;
+      }
+
+      .hero-description {
+        font-size: 1.2rem;
+        color: var(--muted);
+        margin-bottom: 2rem;
+        text-align: center;
+        line-height: 1.6;
+      }
+
+      .hero-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      /* Theme toggle */
+      .theme-toggle {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 10px 15px;
+        background: var(--cta-bg);
+        color: var(--cta-text);
+        border: none;
+        border-radius: var(--radius);
+        cursor: pointer;
+        font-size: 16px;
+        z-index: 1000;
+        transition: all 0.2s ease;
+      }
+
+      .theme-toggle:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow);
+      }
+
+      /* Dark mode adjustments for strands */
+      [data-theme="dark"] .light-strand {
+        background: linear-gradient(
+          45deg,
+          rgba(255, 255, 255, 0.08) 0%,
+          rgba(255, 255, 255, 0.15) 25%,
+          rgba(255, 255, 255, 0.3) 50%,
+          rgba(255, 255, 255, 0.15) 75%,
+          rgba(255, 255, 255, 0.08) 100%
+        );
+        filter: blur(0.8px);
+      }
+
+      [data-theme="dark"] .strand-1 {
+        opacity: 0.9;
+      }
+      [data-theme="dark"] .strand-2 {
+        opacity: 0.7;
+      }
+      [data-theme="dark"] .strand-3 {
+        opacity: 0.6;
+      }
+
+      /* Responsive design */
+      @media (max-width: 768px) {
         .hero {
-            position: relative;
-            text-align: center;
-            padding: 4rem 2rem;
-            max-width: 800px;
-            margin: 0 auto;
-            min-height: 80vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-
-        /* Ethereal background strands */
-        .ethereal-background {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-            pointer-events: none;
-        }
-
-        .light-strand {
-            position: absolute;
-            background: linear-gradient(
-                45deg,
-                rgba(255, 255, 255, 0.02) 0%,
-                rgba(255, 255, 255, 0.08) 25%,
-                rgba(255, 255, 255, 0.15) 50%,
-                rgba(255, 255, 255, 0.08) 75%,
-                rgba(255, 255, 255, 0.02) 100%
-            );
-            border-radius: 50px;
-            filter: blur(1px);
-        }
-
-        .strand-1 {
-            width: 300px;
-            height: 2px;
-            top: 20%;
-            left: -20%;
-            animation: drift-1 25s infinite ease-in-out;
-            opacity: 0.6;
-        }
-
-        .strand-2 {
-            width: 400px;
-            height: 1px;
-            top: 40%;
-            left: -15%;
-            animation: drift-2 30s infinite ease-in-out;
-            opacity: 0.4;
-            animation-delay: -5s;
-        }
-
-        .strand-3 {
-            width: 250px;
-            height: 3px;
-            top: 60%;
-            left: -10%;
-            animation: drift-3 35s infinite ease-in-out;
-            opacity: 0.3;
-            animation-delay: -10s;
-        }
-
-        @keyframes drift-1 {
-            0%, 100% { 
-                transform: translateX(0) translateY(0) rotate(0deg);
-                opacity: 0.6;
-            }
-            25% { 
-                transform: translateX(150px) translateY(-30px) rotate(5deg);
-                opacity: 0.8;
-            }
-            50% { 
-                transform: translateX(300px) translateY(20px) rotate(-3deg);
-                opacity: 0.4;
-            }
-            75% { 
-                transform: translateX(450px) translateY(-10px) rotate(2deg);
-                opacity: 0.7;
-            }
-        }
-
-        @keyframes drift-2 {
-            0%, 100% { 
-                transform: translateX(0) translateY(0) rotate(2deg);
-                opacity: 0.4;
-            }
-            33% { 
-                transform: translateX(200px) translateY(40px) rotate(-4deg);
-                opacity: 0.6;
-            }
-            66% { 
-                transform: translateX(400px) translateY(-20px) rotate(1deg);
-                opacity: 0.3;
-            }
-        }
-
-        @keyframes drift-3 {
-            0%, 100% { 
-                transform: translateX(0) translateY(0) rotate(-1deg);
-                opacity: 0.3;
-            }
-            20% { 
-                transform: translateX(100px) translateY(25px) rotate(3deg);
-                opacity: 0.5;
-            }
-            40% { 
-                transform: translateX(250px) translateY(-15px) rotate(-2deg);
-                opacity: 0.7;
-            }
-            60% { 
-                transform: translateX(350px) translateY(35px) rotate(4deg);
-                opacity: 0.4;
-            }
-            80% { 
-                transform: translateX(480px) translateY(-25px) rotate(-1deg);
-                opacity: 0.6;
-            }
-        }
-
-        /* Hero content structure */
-        .hero-content {
-            position: relative;
-            z-index: 10;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-            max-width: 600px;
+          padding: 2rem 1rem;
+          min-height: 70vh;
         }
 
         .hero-title {
-            font-size: 3rem;
-            font-weight: 800;
-            margin-bottom: 2rem;
-            letter-spacing: -0.02em;
-            color: var(--text);
+          font-size: 2.5rem;
         }
 
-        /* Three.js container positioned between title and description */
         .three-container {
-            width: 350px;
-            height: 200px;
-            margin: 1rem 0 2rem 0;
-            position: relative;
-            z-index: 5;
-        }
-
-        .three-container canvas {
-            display: block;
-            width: 100% !important;
-            height: 100% !important;
+          width: 280px;
+          height: 160px;
+          margin: 0.5rem 0 1.5rem 0;
         }
 
         .hero-description {
-            font-size: 1.2rem;
-            color: var(--muted);
-            margin-bottom: 2rem;
-            text-align: center;
-            line-height: 1.6;
+          font-size: 1.1rem;
         }
 
         .hero-actions {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            flex-wrap: wrap;
+          flex-direction: column;
+          align-items: center;
         }
 
-        /* Theme toggle */
-        .theme-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 10px 15px;
-            background: var(--cta-bg);
-            color: var(--cta-text);
-            border: none;
-            border-radius: var(--radius);
-            cursor: pointer;
-            font-size: 16px;
-            z-index: 1000;
-            transition: all 0.2s ease;
+        .hero-actions .button {
+          width: 100%;
+          max-width: 300px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .hero-title {
+          font-size: 2rem;
         }
 
-        .theme-toggle:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow);
+        .three-container {
+          width: 220px;
+          height: 130px;
         }
 
-        /* Dark mode adjustments for strands */
-        [data-theme="dark"] .light-strand {
-            background: linear-gradient(
-                45deg,
-                rgba(255, 255, 255, 0.08) 0%,
-                rgba(255, 255, 255, 0.15) 25%,
-                rgba(255, 255, 255, 0.3) 50%,
-                rgba(255, 255, 255, 0.15) 75%,
-                rgba(255, 255, 255, 0.08) 100%
-            );
-            filter: blur(0.8px);
+        .hero-description {
+          font-size: 1rem;
+        }
+      }
+
+      /* Reduce motion preferences */
+      @media (prefers-reduced-motion: reduce) {
+        .light-strand {
+          animation-duration: 120s;
+          opacity: 0.7;
         }
 
-        [data-theme="dark"] .strand-1 { opacity: 0.9; }
-        [data-theme="dark"] .strand-2 { opacity: 0.7; }
-        [data-theme="dark"] .strand-3 { opacity: 0.6; }
-
-        /* Responsive design */
-        @media (max-width: 768px) {
-            .hero {
-                padding: 2rem 1rem;
-                min-height: 70vh;
-            }
-            
-            .hero-title {
-                font-size: 2.5rem;
-            }
-            
-            .three-container {
-                width: 280px;
-                height: 160px;
-                margin: 0.5rem 0 1.5rem 0;
-            }
-            
-            .hero-description {
-                font-size: 1.1rem;
-            }
-            
-            .hero-actions {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .hero-actions .button {
-                width: 100%;
-                max-width: 300px;
-            }
+        .three-container {
+          display: none;
         }
-
-        @media (max-width: 480px) {
-            .hero-title {
-                font-size: 2rem;
-            }
-            
-            .three-container {
-                width: 220px;
-                height: 130px;
-            }
-            
-            .hero-description {
-                font-size: 1rem;
-            }
-        }
-
-        /* Reduce motion preferences */
-        @media (prefers-reduced-motion: reduce) {
-            .light-strand {
-                animation-duration: 120s;
-                opacity: 0.7;
-            }
-            
-            .three-container {
-                display: none;
-            }
-        }
+      }
     </style>
-</head>
-<body>
-
+  </head>
+  <body>
     <section class="hero" id="home">
-        <!-- Ethereal background -->
-        <div class="ethereal-background">
-            <div class="light-strand strand-1"></div>
-            <div class="light-strand strand-2"></div>
-            <div class="light-strand strand-3"></div>
+      <!-- Ethereal background -->
+      <div class="ethereal-background">
+        <div class="light-strand strand-1"></div>
+        <div class="light-strand strand-2"></div>
+        <div class="light-strand strand-3"></div>
+      </div>
+
+      <div class="hero-content">
+        <!-- Title first -->
+        <h1 class="hero-title">Creative Digital Solutions</h1>
+
+        <!-- Three.js cube between title and description -->
+        <div id="three-container" class="three-container"></div>
+
+        <!-- Description and actions -->
+        <p class="hero-description">
+          Crafting elegant digital experiences that make an impact.
+        </p>
+
+        <div class="hero-actions">
+          <a href="#portfolio" class="button">View Services</a>
+          <a href="#contact" class="button button-outline">Get in Touch</a>
         </div>
-        
-        <div class="hero-content">
-            <!-- Title first -->
-            <h1 class="hero-title">Creative Digital Solutions</h1>
-            
-            <!-- Three.js cube between title and description -->
-            <div id="three-container" class="three-container"></div>
-            
-            <!-- Description and actions -->
-            <p class="hero-description">Crafting elegant digital experiences that make an impact. Our innovative approach combines cutting-edge technology with thoughtful design.</p>
-            
-            <div class="hero-actions">
-                <a href="#portfolio" class="button">View Services</a>
-                <a href="#contact" class="button button-outline">Get in Touch</a>
-            </div>
-        </div>
+      </div>
     </section>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"
+    ></script>
     <script>
-        // Global theme state and Three.js objects
-        let currentTheme = 'light';
-        let cube = null;
-        let cubePoints = [];
+      let cube = null;
+      let cubePoints = [];
 
-        function toggleTheme() {
-            currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', currentTheme);
-            document.querySelector('.theme-toggle').textContent = currentTheme === 'dark' ? '☀' : '☾';
-            
-            // Update Three.js materials immediately
-            updateThreeJSTheme();
-        }
+      export function updateThreeJSTheme(currentTheme) {
+        if (!cube || !cubePoints) return;
+        const isDark = currentTheme === "dark";
 
-        function updateThreeJSTheme() {
-            if (!cube || !cubePoints) return;
-            
-            const isDark = currentTheme === 'dark';
-            
-            // Update cube material
-            if (isDark) {
-                cube.material.color.setHex(0xffffff);
-                cube.material.opacity = 0.4;
-            } else {
-                cube.material.color.setHex(0x000000);
-                cube.material.opacity = 0.3;
-            }
-            
-            // Update point materials
-            cubePoints.forEach(point => {
-                if (isDark) {
-                    point.material.color.setHex(0xffffff);
-                } else {
-                    point.material.color.setHex(0x000000);
-                }
-            });
-        }
+        // Cube
+        cube.material.color.setHex(isDark ? 0xffffff : 0x000000);
+        cube.material.opacity = isDark ? 0.4 : 0.3;
 
-        // Three.js setup
-        document.addEventListener('DOMContentLoaded', () => {
-            const container = document.getElementById('three-container');
-            if (!container) return;
-
-            // Scene setup
-            const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-            const renderer = new THREE.WebGLRenderer({ 
-                antialias: true, 
-                alpha: true 
-            });
-            
-            renderer.setSize(container.clientWidth, container.clientHeight);
-            renderer.setClearColor(0x000000, 0); // Transparent background
-            container.appendChild(renderer.domElement);
-
-            // Create cube geometry
-            const geometry = new THREE.BoxGeometry(1, 1, 1);
-            
-            // Create material with wireframe
-            const material = new THREE.MeshBasicMaterial({
-                color: 0x000000,
-                wireframe: true,
-                transparent: true,
-                opacity: 0.3
-            });
-            
-            cube = new THREE.Mesh(geometry, material);
-            scene.add(cube);
-
-            // Add points at cube vertices
-            const pointGeometry = new THREE.SphereGeometry(0.02, 8, 8);
-            const pointMaterial = new THREE.MeshBasicMaterial({
-                color: 0x000000,
-                transparent: true,
-                opacity: 0.4
-            });
-
-            // Cube vertices
-            const vertices = [
-                [-0.5, -0.5, -0.5], [0.5, -0.5, -0.5],
-                [-0.5, 0.5, -0.5], [0.5, 0.5, -0.5],
-                [-0.5, -0.5, 0.5], [0.5, -0.5, 0.5],
-                [-0.5, 0.5, 0.5], [0.5, 0.5, 0.5]
-            ];
-
-            vertices.forEach(vertex => {
-                const point = new THREE.Mesh(pointGeometry, pointMaterial.clone());
-                point.position.set(...vertex);
-                cubePoints.push(point);
-                scene.add(point);
-            });
-
-            // Position camera
-            camera.position.z = 3;
-
-            // Mouse tracking variables
-            const mouse = { x: 0, y: 0 };
-            const targetRotation = { x: 0, y: 0 };
-            const currentRotation = { x: 0, y: 0 };
-            let time = 0;
-
-            // Mouse move handler
-            function handleMouseMove(event) {
-                const rect = container.getBoundingClientRect();
-                mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-                mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-                
-                targetRotation.y = mouse.x * Math.PI * 0.3;
-                targetRotation.x = mouse.y * Math.PI * 0.2;
-            }
-
-            container.addEventListener('mousemove', handleMouseMove);
-
-            // Animation function
-            function animate() {
-                requestAnimationFrame(animate);
-                
-                time += 0.005;
-                
-                // Smooth rotation interpolation
-                const lerpFactor = 0.05;
-                currentRotation.x += (targetRotation.x - currentRotation.x) * lerpFactor;
-                currentRotation.y += (targetRotation.y - currentRotation.y) * lerpFactor;
-                
-                // Apply rotation to cube
-                cube.rotation.x = currentRotation.x + time * 0.2;
-                cube.rotation.y = currentRotation.y + time * 0.3;
-                
-                // Subtle pulsing effect for points
-                cubePoints.forEach((point, i) => {
-                    const isDark = currentTheme === 'dark';
-                    const baseOpacity = isDark ? 0.5 : 0.4;
-                    point.material.opacity = baseOpacity + Math.sin(time + i * 0.5) * 0.1;
-                });
-                
-                renderer.render(scene, camera);
-            }
-
-            // Handle window resize
-            function handleResize() {
-                if (!container) return;
-                
-                const width = container.clientWidth;
-                const height = container.clientHeight;
-                
-                camera.aspect = width / height;
-                camera.updateProjectionMatrix();
-                renderer.setSize(width, height);
-            }
-            
-            window.addEventListener('resize', handleResize);
-            
-            // Initialize theme for Three.js
-            updateThreeJSTheme();
-            
-            // Start animation
-            animate();
-            
-            // Cleanup
-            window.addEventListener('beforeunload', () => {
-                window.removeEventListener('resize', handleResize);
-                container.removeEventListener('mousemove', handleMouseMove);
-                renderer.dispose();
-                geometry.dispose();
-                material.dispose();
-                pointGeometry.dispose();
-                pointMaterial.dispose();
-                cubePoints.forEach(point => {
-                    if (point.material) point.material.dispose();
-                });
-            });
+        // Points
+        cubePoints.forEach((point) => {
+          point.material.color.setHex(isDark ? 0xffffff : 0x000000);
         });
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const container = document.getElementById("three-container");
+        if (!container) return;
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(
+          75,
+          container.clientWidth / container.clientHeight,
+          0.1,
+          1000
+        );
+        const renderer = new THREE.WebGLRenderer({
+          antialias: true,
+          alpha: true,
+        });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setClearColor(0x000000, 0);
+        container.appendChild(renderer.domElement);
+
+        const geometry = new THREE.BoxGeometry(1, 1, 1);
+        const material = new THREE.MeshBasicMaterial({
+          color: 0x000000,
+          wireframe: true,
+          transparent: true,
+          opacity: 0.3,
+        });
+        cube = new THREE.Mesh(geometry, material);
+        scene.add(cube);
+
+        const pointGeometry = new THREE.SphereGeometry(0.02, 8, 8);
+        const pointMaterial = new THREE.MeshBasicMaterial({
+          color: 0x000000,
+          transparent: true,
+          opacity: 0.4,
+        });
+
+        const vertices = [
+          [-0.5, -0.5, -0.5],
+          [0.5, -0.5, -0.5],
+          [-0.5, 0.5, -0.5],
+          [0.5, 0.5, -0.5],
+          [-0.5, -0.5, 0.5],
+          [0.5, -0.5, 0.5],
+          [-0.5, 0.5, 0.5],
+          [0.5, 0.5, 0.5],
+        ];
+
+        vertices.forEach((v) => {
+          const point = new THREE.Mesh(pointGeometry, pointMaterial.clone());
+          point.position.set(...v);
+          cubePoints.push(point);
+          scene.add(point);
+        });
+
+        camera.position.z = 3;
+
+        const mouse = { x: 0, y: 0 };
+        const targetRotation = { x: 0, y: 0 };
+        const currentRotation = { x: 0, y: 0 };
+        let time = 0;
+
+        container.addEventListener("mousemove", (e) => {
+          const rect = container.getBoundingClientRect();
+          mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+          mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+          targetRotation.y = mouse.x * Math.PI * 0.3;
+          targetRotation.x = mouse.y * Math.PI * 0.2;
+        });
+
+        function animate() {
+          requestAnimationFrame(animate);
+          time += 0.005;
+
+          const lerpFactor = 0.05;
+          currentRotation.x +=
+            (targetRotation.x - currentRotation.x) * lerpFactor;
+          currentRotation.y +=
+            (targetRotation.y - currentRotation.y) * lerpFactor;
+
+          cube.rotation.x = currentRotation.x + time * 0.2;
+          cube.rotation.y = currentRotation.y + time * 0.3;
+
+          cubePoints.forEach((point, i) => {
+            const baseOpacity =
+              document.documentElement.getAttribute("data-theme") === "dark"
+                ? 0.5
+                : 0.4;
+            point.material.opacity =
+              baseOpacity + Math.sin(time + i * 0.5) * 0.1;
+          });
+
+          renderer.render(scene, camera);
+        }
+
+        animate();
+      });
     </script>
-</body>
+  </body>
 </html>
