@@ -13,6 +13,9 @@ function updateTheme(theme) {
     root.removeAttribute('data-theme');
     updateToggleButtons('☾');
   }
+  
+  // Trigger custom event for Three.js components to listen to
+  window.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme } }));
 }
 
 function updateToggleButtons(icon) {
@@ -25,7 +28,15 @@ function updateToggleButtons(icon) {
   });
 }
 
+function toggleTheme() {
+  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  updateTheme(newTheme);
+}
+
 function initializeTheme() {
+  // Set initial theme
+  updateTheme('light');
+  
   const toggleBtns = [
     document.getElementById('theme-toggle'),
     document.getElementById('theme-toggle-mobile')
@@ -33,10 +44,7 @@ function initializeTheme() {
   
   toggleBtns.forEach(btn => {
     if (btn) {
-      btn.addEventListener('click', () => {
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        updateTheme(newTheme);
-      });
+      btn.addEventListener('click', toggleTheme);
     }
   });
 
@@ -79,3 +87,6 @@ function initializeTheme() {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', initializeTheme);
+
+// Export for potential use in other scripts
+window.toggleTheme = toggleTheme;

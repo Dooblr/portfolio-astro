@@ -1,542 +1,563 @@
-<!-- --- // src/components/Hero.astro --- -->
-<section class="hero" id="home">
-  <div class="ethereal-background">
-    <div class="light-strand strand-1"></div>
-    <div class="light-strand strand-2"></div>
-    <div class="light-strand strand-3"></div>
-    <div class="light-strand strand-4"></div>
-    <div class="light-strand strand-5"></div>
-    <div class="light-strand strand-6"></div>
-  </div>
-  
-  <!-- Three.js Canvas Container -->
-  <div id="three-container" class="three-container"></div>
-  
-  <div class="hero-content">
-    <h1>Creative Digital Solutions</h1>
-    <p>Crafting elegant digital experiences that make an impact.</p>
-    <div class="hero-actions">
-      <a href="#portfolio" class="button">View Services</a>
-      <a href="#contact" class="button button-outline">Get in Touch</a>
-    </div>
-  </div>
-</section>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hero with Interactive Cube</title>
+    <style>
+        /* Variables */
+        :root {
+            --nav-height: 64px;
+            --gap: 1rem;
+            
+            /* Light mode */
+            --bg: #ffffff;
+            --text: #111111;
+            --muted: #555555;
+            --border: #e5e5e5;
+            --card-bg: #fafafa;
+            
+            /* Accent purely black/white */
+            --accent: #000000;
+            --cta-bg: #000000;
+            --cta-text: #ffffff;
+            
+            --radius: 10px;
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
 
-<script>
-// Import Three.js
-import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+        /* Dark mode overrides */
+        [data-theme="dark"] {
+            --bg: #111111;
+            --text: #f5f5f5;
+            --muted: #aaaaaa;
+            --border: #333333;
+            --card-bg: #1a1a1a;
+            --accent: #ffffff;
+            --cta-bg: #ffffff;
+            --cta-text: #111111;
+            --shadow: 0 2px 10px rgba(255, 255, 255, 0.1);
+        }
 
-// Wait for DOM to be ready
-document.addEventListener('DOMContentLoaded', () => {
-  const container = document.getElementById('three-container');
-  if (!container) return;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  // Scene setup
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-  const renderer = new THREE.WebGLRenderer({ 
-    antialias: true, 
-    alpha: true 
-  });
-  
-  renderer.setSize(container.clientWidth, container.clientHeight);
-  renderer.setClearColor(0x000000, 0); // Transparent background
-  container.appendChild(renderer.domElement);
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
 
-  // Create cube geometry
-  const geometry = new THREE.BoxGeometry(1, 1, 1);
-  
-  // Create material with wireframe
-  const material = new THREE.MeshBasicMaterial({
-    color: 0x000000, // Start with black
-    wireframe: true,
-    transparent: true,
-    opacity: 0.2
-  });
-  
-  const cube = new THREE.Mesh(geometry, material);
-  scene.add(cube);
+        .button {
+            background: var(--cta-bg);
+            color: var(--cta-text);
+            padding: 0.8rem 1.5rem;
+            border-radius: var(--radius);
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: 2px solid var(--accent);
+            display: inline-block;
+            cursor: pointer;
+            font-size: 1rem;
+        }
 
-  // Add some subtle lighting effect with points
-  const points = [];
-  const pointGeometry = new THREE.SphereGeometry(0.02, 8, 8);
-  const pointMaterial = new THREE.MeshBasicMaterial({
-    color: 0x000000, // Start with black
-    transparent: true,
-    opacity: 0.3
-  });
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
 
-  // Add points at cube vertices for extra visual interest
-  for (let i = 0; i < 8; i++) {
-    const point = new THREE.Mesh(pointGeometry, pointMaterial);
-    points.push(point);
-    scene.add(point);
-  }
+        .button-outline {
+            background: transparent;
+            color: var(--text);
+            border: 2px solid var(--border);
+        }
 
-  // Position camera
-  camera.position.z = 3;
+        .button-outline:hover {
+            background: var(--border);
+        }
 
-  // Mouse tracking variables
-  const mouse = { x: 0, y: 0 };
-  const targetRotation = { x: 0, y: 0 };
-  const currentRotation = { x: 0, y: 0 };
+        /* Hero Section */
+        .hero {
+            position: relative;
+            text-align: center;
+            padding: 4rem 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
 
-  let time = 0;
+        /* Ethereal background strands */
+        .ethereal-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
 
-  // Set initial point positions
-  updatePointPositions();
+        .light-strand {
+            position: absolute;
+            background: linear-gradient(
+                45deg,
+                rgba(255, 255, 255, 0.02) 0%,
+                rgba(255, 255, 255, 0.08) 25%,
+                rgba(255, 255, 255, 0.15) 50%,
+                rgba(255, 255, 255, 0.08) 75%,
+                rgba(255, 255, 255, 0.02) 100%
+            );
+            border-radius: 50px;
+            filter: blur(1px);
+        }
 
-  // Mouse move handler
-  function handleMouseMove(event) {
-    const rect = container.getBoundingClientRect();
-    mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-    mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-    
-    // Calculate target rotation based on mouse position
-    targetRotation.y = mouse.x * Math.PI * 0.3; // Horizontal rotation
-    targetRotation.x = mouse.y * Math.PI * 0.2; // Vertical rotation
-  }
+        .strand-1 {
+            width: 300px;
+            height: 2px;
+            top: 20%;
+            left: -20%;
+            animation: drift-1 25s infinite ease-in-out;
+            opacity: 0.6;
+        }
 
-  // Add mouse move listener to the container
-  container.addEventListener('mousemove', handleMouseMove);
+        .strand-2 {
+            width: 400px;
+            height: 1px;
+            top: 40%;
+            left: -15%;
+            animation: drift-2 30s infinite ease-in-out;
+            opacity: 0.4;
+            animation-delay: -5s;
+        }
 
-  // Animation function
-  function animate() {
-    requestAnimationFrame(animate);
-    
-    time += 0.005;
-    
-    // Smooth rotation interpolation
-    const lerpFactor = 0.05;
-    currentRotation.x += (targetRotation.x - currentRotation.x) * lerpFactor;
-    currentRotation.y += (targetRotation.y - currentRotation.y) * lerpFactor;
-    
-    // Apply rotation to cube
-    cube.rotation.x = currentRotation.x + time * 0.2; // Add slow auto-rotation
-    cube.rotation.y = currentRotation.y + time * 0.3;
-    
-    // Subtle pulsing effect for points
-    points.forEach((point, i) => {
-      const baseOpacity = document.documentElement.getAttribute('data-theme') === 'dark' ? 0.4 : 0.3;
-      point.material.opacity = baseOpacity + Math.sin(time + i * 0.5) * 0.1;
-    });
-    
-    renderer.render(scene, camera);
-  }
+        .strand-3 {
+            width: 250px;
+            height: 3px;
+            top: 60%;
+            left: -10%;
+            animation: drift-3 35s infinite ease-in-out;
+            opacity: 0.3;
+            animation-delay: -10s;
+        }
 
-  // Update point positions based on cube vertices
-  function updatePointPositions() {
-    const vertices = [
-      [-0.5, -0.5, -0.5], [0.5, -0.5, -0.5],
-      [-0.5, 0.5, -0.5], [0.5, 0.5, -0.5],
-      [-0.5, -0.5, 0.5], [0.5, -0.5, 0.5],
-      [-0.5, 0.5, 0.5], [0.5, 0.5, 0.5]
-    ];
-    
-    vertices.forEach((vertex, i) => {
-      if (points[i]) {
-        points[i].position.set(...vertex);
-      }
-    });
-  }
+        @keyframes drift-1 {
+            0%, 100% { 
+                transform: translateX(0) translateY(0) rotate(0deg);
+                opacity: 0.6;
+            }
+            25% { 
+                transform: translateX(150px) translateY(-30px) rotate(5deg);
+                opacity: 0.8;
+            }
+            50% { 
+                transform: translateX(300px) translateY(20px) rotate(-3deg);
+                opacity: 0.4;
+            }
+            75% { 
+                transform: translateX(450px) translateY(-10px) rotate(2deg);
+                opacity: 0.7;
+            }
+        }
 
-  // Handle window resize
-  function handleResize() {
-    if (!container) return;
-    
-    const width = container.clientWidth;
-    const height = container.clientHeight;
-    
-    camera.aspect = width / height;
-    camera.updateProjectionMatrix();
-    renderer.setSize(width, height);
-  }
-  
-  window.addEventListener('resize', handleResize);
-  
-  // Handle theme changes
-  function updateTheme() {
-    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    
-    if (isDark) {
-      // White cube and points for dark mode
-      cube.material.color.setHex(0xffffff);
-      cube.material.opacity = 0.3;
-      points.forEach(point => {
-        point.material.color.setHex(0xffffff);
-        point.material.opacity = 0.4;
-      });
-    } else {
-      // Black cube and points for light mode
-      cube.material.color.setHex(0x000000);
-      cube.material.opacity = 0.2;
-      points.forEach(point => {
-        point.material.color.setHex(0x000000);
-        point.material.opacity = 0.3;
-      });
-    }
-  }
-  
-  // Listen for theme changes
-  const observer = new MutationObserver(updateTheme);
-  observer.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ['data-theme']
-  });
-  
-  // Initial theme setup
-  updateTheme();
-  
-  // Start animation
-  animate();
-  
-  // Cleanup function
-  window.addEventListener('beforeunload', () => {
-    observer.disconnect();
-    window.removeEventListener('resize', handleResize);
-    container.removeEventListener('mousemove', handleMouseMove);
-    renderer.dispose();
-    geometry.dispose();
-    material.dispose();
-    pointGeometry.dispose();
-    pointMaterial.dispose();
-  });
-});
-</script>
+        @keyframes drift-2 {
+            0%, 100% { 
+                transform: translateX(0) translateY(0) rotate(2deg);
+                opacity: 0.4;
+            }
+            33% { 
+                transform: translateX(200px) translateY(40px) rotate(-4deg);
+                opacity: 0.6;
+            }
+            66% { 
+                transform: translateX(400px) translateY(-20px) rotate(1deg);
+                opacity: 0.3;
+            }
+        }
 
-<style>
-.hero {
-  position: relative;
-  text-align: center;
-  padding: 4rem 2rem;
-  max-width: 800px;
-  margin: 0 auto;
-  min-height: 60vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
+        @keyframes drift-3 {
+            0%, 100% { 
+                transform: translateX(0) translateY(0) rotate(-1deg);
+                opacity: 0.3;
+            }
+            20% { 
+                transform: translateX(100px) translateY(25px) rotate(3deg);
+                opacity: 0.5;
+            }
+            40% { 
+                transform: translateX(250px) translateY(-15px) rotate(-2deg);
+                opacity: 0.7;
+            }
+            60% { 
+                transform: translateX(350px) translateY(35px) rotate(4deg);
+                opacity: 0.4;
+            }
+            80% { 
+                transform: translateX(480px) translateY(-25px) rotate(-1deg);
+                opacity: 0.6;
+            }
+        }
 
-.ethereal-background {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-  pointer-events: none;
-}
+        /* Hero content structure */
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 600px;
+        }
 
-.three-container {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 400px;
-  height: 400px;
-  z-index: 2;
-  /* Ensure it stays behind content but can receive mouse events */
-  pointer-events: auto;
-}
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 2rem;
+            letter-spacing: -0.02em;
+            color: var(--text);
+        }
 
-.three-container canvas {
-  /* Remove cursor styles since it's behind content */
-  pointer-events: auto;
-}
+        /* Three.js container positioned between title and description */
+        .three-container {
+            width: 350px;
+            height: 200px;
+            margin: 1rem 0 2rem 0;
+            position: relative;
+            z-index: 5;
+            border: 1px solid red;
+        }
 
-.light-strand {
-  position: absolute;
-  background: linear-gradient(
-    45deg,
-    rgba(255, 255, 255, 0.02) 0%,
-    rgba(255, 255, 255, 0.08) 25%,
-    rgba(255, 255, 255, 0.15) 50%,
-    rgba(255, 255, 255, 0.08) 75%,
-    rgba(255, 255, 255, 0.02) 100%
-  );
-  border-radius: 50px;
-  filter: blur(1px);
-}
+        .three-container canvas {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+        }
 
-.strand-1 {
-  width: 300px;
-  height: 2px;
-  top: 20%;
-  left: -20%;
-  animation: drift-1 25s infinite ease-in-out;
-  opacity: 0.6;
-}
+        .hero-description {
+            font-size: 1.2rem;
+            color: var(--muted);
+            margin-bottom: 2rem;
+            text-align: center;
+            line-height: 1.6;
+        }
 
-.strand-2 {
-  width: 400px;
-  height: 1px;
-  top: 40%;
-  left: -15%;
-  animation: drift-2 30s infinite ease-in-out;
-  opacity: 0.4;
-  animation-delay: -5s;
-}
+        .hero-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
 
-.strand-3 {
-  width: 250px;
-  height: 3px;
-  top: 60%;
-  left: -10%;
-  animation: drift-3 35s infinite ease-in-out;
-  opacity: 0.3;
-  animation-delay: -10s;
-}
+        /* Theme toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            background: var(--cta-bg);
+            color: var(--cta-text);
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 16px;
+            z-index: 1000;
+            transition: all 0.2s ease;
+        }
 
-.strand-4 {
-  width: 350px;
-  height: 1px;
-  top: 15%;
-  right: -20%;
-  animation: drift-4 28s infinite ease-in-out;
-  opacity: 0.5;
-  animation-delay: -3s;
-}
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
 
-.strand-5 {
-  width: 200px;
-  height: 2px;
-  top: 75%;
-  right: -15%;
-  animation: drift-5 32s infinite ease-in-out;
-  opacity: 0.4;
-  animation-delay: -8s;
-}
+        /* Dark mode adjustments for strands */
+        [data-theme="dark"] .light-strand {
+            background: linear-gradient(
+                45deg,
+                rgba(255, 255, 255, 0.08) 0%,
+                rgba(255, 255, 255, 0.15) 25%,
+                rgba(255, 255, 255, 0.3) 50%,
+                rgba(255, 255, 255, 0.15) 75%,
+                rgba(255, 255, 255, 0.08) 100%
+            );
+            filter: blur(0.8px);
+        }
 
-.strand-6 {
-  width: 450px;
-  height: 1px;
-  top: 45%;
-  left: -25%;
-  animation: drift-6 40s infinite ease-in-out;
-  opacity: 0.2;
-  animation-delay: -15s;
-}
+        [data-theme="dark"] .strand-1 { opacity: 0.9; }
+        [data-theme="dark"] .strand-2 { opacity: 0.7; }
+        [data-theme="dark"] .strand-3 { opacity: 0.6; }
 
-@keyframes drift-1 {
-  0%, 100% { 
-    transform: translateX(0) translateY(0) rotate(0deg);
-    opacity: 0.6;
-  }
-  25% { 
-    transform: translateX(150px) translateY(-30px) rotate(5deg);
-    opacity: 0.8;
-  }
-  50% { 
-    transform: translateX(300px) translateY(20px) rotate(-3deg);
-    opacity: 0.4;
-  }
-  75% { 
-    transform: translateX(450px) translateY(-10px) rotate(2deg);
-    opacity: 0.7;
-  }
-}
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 2rem 1rem;
+                min-height: 70vh;
+            }
+            
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .three-container {
+                width: 280px;
+                height: 160px;
+                margin: 0.5rem 0 1.5rem 0;
+            }
+            
+            .hero-description {
+                font-size: 1.1rem;
+            }
+            
+            .hero-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .hero-actions .button {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
 
-@keyframes drift-2 {
-  0%, 100% { 
-    transform: translateX(0) translateY(0) rotate(2deg);
-    opacity: 0.4;
-  }
-  33% { 
-    transform: translateX(200px) translateY(40px) rotate(-4deg);
-    opacity: 0.6;
-  }
-  66% { 
-    transform: translateX(400px) translateY(-20px) rotate(1deg);
-    opacity: 0.3;
-  }
-}
+        @media (max-width: 480px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .three-container {
+                width: 220px;
+                height: 130px;
+            }
+            
+            .hero-description {
+                font-size: 1rem;
+            }
+        }
 
-@keyframes drift-3 {
-  0%, 100% { 
-    transform: translateX(0) translateY(0) rotate(-1deg);
-    opacity: 0.3;
-  }
-  20% { 
-    transform: translateX(100px) translateY(25px) rotate(3deg);
-    opacity: 0.5;
-  }
-  40% { 
-    transform: translateX(250px) translateY(-15px) rotate(-2deg);
-    opacity: 0.7;
-  }
-  60% { 
-    transform: translateX(350px) translateY(35px) rotate(4deg);
-    opacity: 0.4;
-  }
-  80% { 
-    transform: translateX(480px) translateY(-25px) rotate(-1deg);
-    opacity: 0.6;
-  }
-}
+        /* Reduce motion preferences */
+        @media (prefers-reduced-motion: reduce) {
+            .light-strand {
+                animation-duration: 120s;
+                opacity: 0.7;
+            }
+            
+            .three-container {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()">☾</button>
 
-@keyframes drift-4 {
-  0%, 100% { 
-    transform: translateX(0) translateY(0) rotate(3deg);
-    opacity: 0.5;
-  }
-  30% { 
-    transform: translateX(-180px) translateY(-35px) rotate(-2deg);
-    opacity: 0.7;
-  }
-  70% { 
-    transform: translateX(-350px) translateY(15px) rotate(1deg);
-    opacity: 0.3;
-  }
-}
+    <section class="hero" id="home">
+        <!-- Ethereal background -->
+        <div class="ethereal-background">
+            <div class="light-strand strand-1"></div>
+            <div class="light-strand strand-2"></div>
+            <div class="light-strand strand-3"></div>
+        </div>
+        
+        <div class="hero-content">
+            <!-- Title first -->
+            <h1 class="hero-title">Creative Digital Solutions</h1>
+            
+            <!-- Three.js cube between title and description -->
+            <div id="three-container" class="three-container"></div>
+            
+            <!-- Description and actions -->
+            <p class="hero-description">Crafting elegant digital experiences that make an impact. Our innovative approach combines cutting-edge technology with thoughtful design.</p>
+            
+            <div class="hero-actions">
+                <a href="#portfolio" class="button">View Services</a>
+                <a href="#contact" class="button button-outline">Get in Touch</a>
+            </div>
+        </div>
+    </section>
 
-@keyframes drift-5 {
-  0%, 100% { 
-    transform: translateX(0) translateY(0) rotate(-2deg);
-    opacity: 0.4;
-  }
-  25% { 
-    transform: translateX(-120px) translateY(30px) rotate(4deg);
-    opacity: 0.6;
-  }
-  50% { 
-    transform: translateX(-280px) translateY(-20px) rotate(-3deg);
-    opacity: 0.5;
-  }
-  75% { 
-    transform: translateX(-400px) translateY(10px) rotate(1deg);
-    opacity: 0.3;
-  }
-}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Global theme state and Three.js objects
+        let currentTheme = 'light';
+        let cube = null;
+        let cubePoints = [];
 
-@keyframes drift-6 {
-  0%, 100% { 
-    transform: translateX(0) translateY(0) rotate(1deg);
-    opacity: 0.2;
-  }
-  20% { 
-    transform: translateX(150px) translateY(-40px) rotate(-3deg);
-    opacity: 0.4;
-  }
-  40% { 
-    transform: translateX(300px) translateY(25px) rotate(2deg);
-    opacity: 0.6;
-  }
-  60% { 
-    transform: translateX(450px) translateY(-15px) rotate(-1deg);
-    opacity: 0.3;
-  }
-  80% { 
-    transform: translateX(600px) translateY(35px) rotate(4deg);
-    opacity: 0.5;
-  }
-}
+        function toggleTheme() {
+            currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            document.querySelector('.theme-toggle').textContent = currentTheme === 'dark' ? '☀' : '☾';
+            
+            // Update Three.js materials immediately
+            updateThreeJSTheme();
+        }
 
-.hero-content {
-  position: relative;
-  z-index: 10;
-  /* Ensure content is clickable and above the cube */
-}
+        function updateThreeJSTheme() {
+            if (!cube || !cubePoints) return;
+            
+            const isDark = currentTheme === 'dark';
+            
+            // Update cube material
+            if (isDark) {
+                cube.material.color.setHex(0xffffff);
+                cube.material.opacity = 0.4;
+            } else {
+                cube.material.color.setHex(0x000000);
+                cube.material.opacity = 0.3;
+            }
+            
+            // Update point materials
+            cubePoints.forEach(point => {
+                if (isDark) {
+                    point.material.color.setHex(0xffffff);
+                } else {
+                    point.material.color.setHex(0x000000);
+                }
+            });
+        }
 
-.hero-content h1 {
-  font-size: 3rem;
-  font-weight: 800;
-  margin-bottom: 1rem;
-  letter-spacing: -0.02em;
-}
+        // Three.js setup
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('three-container');
+            if (!container) return;
 
-.hero-content p {
-  font-size: 1.2rem;
-  color: var(--muted);
-  margin-bottom: 2rem;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
-}
+            // Scene setup
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ 
+                antialias: true, 
+                alpha: true 
+            });
+            
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setClearColor(0x000000, 0); // Transparent background
+            container.appendChild(renderer.domElement);
 
-.hero-actions {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  flex-wrap: wrap;
-}
+            // Create cube geometry
+            const geometry = new THREE.BoxGeometry(1, 1, 1);
+            
+            // Create material with wireframe
+            const material = new THREE.MeshBasicMaterial({
+                color: 0x000000,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.3
+            });
+            
+            cube = new THREE.Mesh(geometry, material);
+            scene.add(cube);
 
-@media (max-width: 768px) {
-  .hero {
-    padding: 2rem 1rem;
-    min-height: 50vh;
-  }
-  
-  .three-container {
-    width: 250px;
-    height: 250px;
-  }
-  
-  .hero-content h1 {
-    font-size: 2rem;
-  }
-  
-  .hero-content p {
-    font-size: 1rem;
-  }
-  
-  .hero-actions {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .hero-actions .button {
-    width: 100%;
-    max-width: 300px;
-  }
-  
-  /* Reduce strand complexity on mobile */
-  .strand-4, .strand-5, .strand-6 {
-    display: none;
-  }
-}
+            // Add points at cube vertices
+            const pointGeometry = new THREE.SphereGeometry(0.02, 8, 8);
+            const pointMaterial = new THREE.MeshBasicMaterial({
+                color: 0x000000,
+                transparent: true,
+                opacity: 0.4
+            });
 
-@media (max-width: 480px) {
-  .hero-content h1 {
-    font-size: 1.8rem;
-  }
-  
-  .three-container {
-    width: 180px;
-    height: 180px;
-  }
-}
+            // Cube vertices
+            const vertices = [
+                [-0.5, -0.5, -0.5], [0.5, -0.5, -0.5],
+                [-0.5, 0.5, -0.5], [0.5, 0.5, -0.5],
+                [-0.5, -0.5, 0.5], [0.5, -0.5, 0.5],
+                [-0.5, 0.5, 0.5], [0.5, 0.5, 0.5]
+            ];
 
-/* Reduce motion for users who prefer it */
-@media (prefers-reduced-motion: reduce) {
-  .light-strand {
-    animation-duration: 120s;
-    opacity: 0.7;
-  }
-  
-  .three-container {
-    display: none;
-  }
-}
+            vertices.forEach(vertex => {
+                const point = new THREE.Mesh(pointGeometry, pointMaterial.clone());
+                point.position.set(...vertex);
+                cubePoints.push(point);
+                scene.add(point);
+            });
 
-/* Dark mode adjustments - Use bright strands for contrast */
-[data-theme="dark"] .light-strand {
-  background: linear-gradient(
-    45deg,
-    rgba(255, 255, 255, 0.08) 0%,
-    rgba(255, 255, 255, 0.15) 25%,
-    rgba(255, 255, 255, 0.3) 50%,
-    rgba(255, 255, 255, 0.15) 75%,
-    rgba(255, 255, 255, 0.08) 100%
-  );
-  filter: blur(0.8px);
-}
+            // Position camera
+            camera.position.z = 3;
 
-/* Enhanced visibility on dark mode */
-[data-theme="dark"] .strand-1 { opacity: 0.9; }
-[data-theme="dark"] .strand-2 { opacity: 0.7; }
-[data-theme="dark"] .strand-3 { opacity: 0.6; }
-[data-theme="dark"] .strand-4 { opacity: 0.8; }
-[data-theme="dark"] .strand-5 { opacity: 0.7; }
-[data-theme="dark"] .strand-6 { opacity: 0.5; }
-</style>
+            // Mouse tracking variables
+            const mouse = { x: 0, y: 0 };
+            const targetRotation = { x: 0, y: 0 };
+            const currentRotation = { x: 0, y: 0 };
+            let time = 0;
+
+            // Mouse move handler
+            function handleMouseMove(event) {
+                const rect = container.getBoundingClientRect();
+                mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+                mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+                
+                targetRotation.y = mouse.x * Math.PI * 0.3;
+                targetRotation.x = mouse.y * Math.PI * 0.2;
+            }
+
+            container.addEventListener('mousemove', handleMouseMove);
+
+            // Animation function
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                time += 0.005;
+                
+                // Smooth rotation interpolation
+                const lerpFactor = 0.05;
+                currentRotation.x += (targetRotation.x - currentRotation.x) * lerpFactor;
+                currentRotation.y += (targetRotation.y - currentRotation.y) * lerpFactor;
+                
+                // Apply rotation to cube
+                cube.rotation.x = currentRotation.x + time * 0.2;
+                cube.rotation.y = currentRotation.y + time * 0.3;
+                
+                // Subtle pulsing effect for points
+                cubePoints.forEach((point, i) => {
+                    const isDark = currentTheme === 'dark';
+                    const baseOpacity = isDark ? 0.5 : 0.4;
+                    point.material.opacity = baseOpacity + Math.sin(time + i * 0.5) * 0.1;
+                });
+                
+                renderer.render(scene, camera);
+            }
+
+            // Handle window resize
+            function handleResize() {
+                if (!container) return;
+                
+                const width = container.clientWidth;
+                const height = container.clientHeight;
+                
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+                renderer.setSize(width, height);
+            }
+            
+            window.addEventListener('resize', handleResize);
+            
+            // Initialize theme for Three.js
+            updateThreeJSTheme();
+            
+            // Start animation
+            animate();
+            
+            // Cleanup
+            window.addEventListener('beforeunload', () => {
+                window.removeEventListener('resize', handleResize);
+                container.removeEventListener('mousemove', handleMouseMove);
+                renderer.dispose();
+                geometry.dispose();
+                material.dispose();
+                pointGeometry.dispose();
+                pointMaterial.dispose();
+                cubePoints.forEach(point => {
+                    if (point.material) point.material.dispose();
+                });
+            });
+        });
+    </script>
+</body>
+</html>
