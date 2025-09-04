@@ -23,6 +23,7 @@
 </section>
 
 <script>
+// Import Three.js
 import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
 
 // Wait for DOM to be ready
@@ -45,12 +46,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // Create cube geometry
   const geometry = new THREE.BoxGeometry(1, 1, 1);
   
-  // Create material with wireframe and transparent edges
+  // Create material with wireframe
   const material = new THREE.MeshBasicMaterial({
-    color: 0xffffff,
+    color: 0x000000, // Start with black
     wireframe: true,
     transparent: true,
-    opacity: 0.3
+    opacity: 0.2
   });
   
   const cube = new THREE.Mesh(geometry, material);
@@ -60,9 +61,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const points = [];
   const pointGeometry = new THREE.SphereGeometry(0.02, 8, 8);
   const pointMaterial = new THREE.MeshBasicMaterial({
-    color: 0xffffff,
+    color: 0x000000, // Start with black
     transparent: true,
-    opacity: 0.6
+    opacity: 0.3
   });
 
   // Add points at cube vertices for extra visual interest
@@ -75,7 +76,29 @@ document.addEventListener('DOMContentLoaded', () => {
   // Position camera
   camera.position.z = 3;
 
+  // Mouse tracking variables
+  const mouse = { x: 0, y: 0 };
+  const targetRotation = { x: 0, y: 0 };
+  const currentRotation = { x: 0, y: 0 };
+
   let time = 0;
+
+  // Set initial point positions
+  updatePointPositions();
+
+  // Mouse move handler
+  function handleMouseMove(event) {
+    const rect = container.getBoundingClientRect();
+    mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+    
+    // Calculate target rotation based on mouse position
+    targetRotation.y = mouse.x * Math.PI * 0.3; // Horizontal rotation
+    targetRotation.x = mouse.y * Math.PI * 0.2; // Vertical rotation
+  }
+
+  // Add mouse move listener to the container
+  container.addEventListener('mousemove', handleMouseMove);
 
   // Animation function
   function animate() {
@@ -83,15 +106,26 @@ document.addEventListener('DOMContentLoaded', () => {
     
     time += 0.005;
     
-    // Rotate cube slowly
-    cube.rotation.x += 0.003;
-    cube.rotation.y += 0.005;
+    // Smooth rotation interpolation
+    const lerpFactor = 0.05;
+    currentRotation.x += (targetRotation.x - currentRotation.x) * lerpFactor;
+    currentRotation.y += (targetRotation.y - currentRotation.y) * lerpFactor;
     
-    // Animate cube scale subtly
-    const scale = 1 + Math.sin(time) * 0.1;
-    cube.scale.set(scale, scale, scale);
+    // Apply rotation to cube
+    cube.rotation.x = currentRotation.x + time * 0.2; // Add slow auto-rotation
+    cube.rotation.y = currentRotation.y + time * 0.3;
     
-    // Update vertex points to follow cube corners
+    // Subtle pulsing effect for points
+    points.forEach((point, i) => {
+      const baseOpacity = document.documentElement.getAttribute('data-theme') === 'dark' ? 0.4 : 0.3;
+      point.material.opacity = baseOpacity + Math.sin(time + i * 0.5) * 0.1;
+    });
+    
+    renderer.render(scene, camera);
+  }
+
+  // Update point positions based on cube vertices
+  function updatePointPositions() {
     const vertices = [
       [-0.5, -0.5, -0.5], [0.5, -0.5, -0.5],
       [-0.5, 0.5, -0.5], [0.5, 0.5, -0.5],
@@ -101,16 +135,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     vertices.forEach((vertex, i) => {
       if (points[i]) {
-        const rotatedVertex = new THREE.Vector3(...vertex);
-        rotatedVertex.applyMatrix4(cube.matrix);
-        points[i].position.copy(rotatedVertex);
-        
-        // Subtle pulsing effect
-        points[i].material.opacity = 0.6 + Math.sin(time + i * 0.5) * 0.2;
+        points[i].position.set(...vertex);
       }
     });
-    
-    renderer.render(scene, camera);
   }
 
   // Handle window resize
@@ -130,13 +157,24 @@ document.addEventListener('DOMContentLoaded', () => {
   // Handle theme changes
   function updateTheme() {
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    const opacity = isDark ? 0.5 : 0.3;
-    const pointOpacity = isDark ? 0.8 : 0.6;
     
-    cube.material.opacity = opacity;
-    points.forEach(point => {
-      point.material.opacity = pointOpacity;
-    });
+    if (isDark) {
+      // White cube and points for dark mode
+      cube.material.color.setHex(0xffffff);
+      cube.material.opacity = 0.3;
+      points.forEach(point => {
+        point.material.color.setHex(0xffffff);
+        point.material.opacity = 0.4;
+      });
+    } else {
+      // Black cube and points for light mode
+      cube.material.color.setHex(0x000000);
+      cube.material.opacity = 0.2;
+      points.forEach(point => {
+        point.material.color.setHex(0x000000);
+        point.material.opacity = 0.3;
+      });
+    }
   }
   
   // Listen for theme changes
@@ -156,6 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('beforeunload', () => {
     observer.disconnect();
     window.removeEventListener('resize', handleResize);
+    container.removeEventListener('mousemove', handleMouseMove);
     renderer.dispose();
     geometry.dispose();
     material.dispose();
@@ -194,10 +233,16 @@ document.addEventListener('DOMContentLoaded', () => {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 300px;
-  height: 300px;
+  width: 400px;
+  height: 400px;
   z-index: 2;
-  pointer-events: none;
+  /* Ensure it stays behind content but can receive mouse events */
+  pointer-events: auto;
+}
+
+.three-container canvas {
+  /* Remove cursor styles since it's behind content */
+  pointer-events: auto;
 }
 
 .light-strand {
@@ -390,6 +435,7 @@ document.addEventListener('DOMContentLoaded', () => {
 .hero-content {
   position: relative;
   z-index: 10;
+  /* Ensure content is clickable and above the cube */
 }
 
 .hero-content h1 {
@@ -422,8 +468,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   
   .three-container {
-    width: 200px;
-    height: 200px;
+    width: 250px;
+    height: 250px;
   }
   
   .hero-content h1 {
@@ -456,8 +502,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   
   .three-container {
-    width: 150px;
-    height: 150px;
+    width: 180px;
+    height: 180px;
   }
 }
 
