@@ -1,14 +1,27 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
+// src/pages/index.astro
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.astro';
+import Hero from '../components/Hero.astro';
+import Services from '../components/Services.astro';
+import About from '../components/About.astro';
+import Contact from '../components/Contact.astro';
+import Footer from '../components/Footer.astro';
 ---
 
-<BaseLayout>
-  <section id="hero">
-    <h1>Hi, I’m Your Name</h1>
-    <p>I build fast, modern websites with React, Firebase, and Astro.</p>
-    <div id="links">
-      <a href="/portfolio" class="button">View My Work</a>
-      <a href="/contact" class="button">Hire Me</a>
-    </div>
-  </section>
-</BaseLayout>
+<Layout title="Sugarfox Media - Portfolio">
+  <Navbar />
+  <main>
+    <Hero />
+    <About />
+    <Services />
+    <Contact />
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  main {
+    min-height: calc(100vh - var(--nav-height) - 100px);
+  }
+</style>

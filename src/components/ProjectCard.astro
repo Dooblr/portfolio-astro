@@ -1,10 +1,60 @@
 ---
-const { title, description, image, link } = Astro.props;
+// src/components/ProjectCard.astro
+export interface Props {
+  title: string;
+  description: string;
+  link?: string;
+}
+
+const { title, description, link = "#" } = Astro.props;
 ---
 
 <article class="project-card">
-  <img src={image} alt={title} />
   <h3>{title}</h3>
   <p>{description}</p>
-  <a href={link} target="_blank">View Project</a>
 </article>
+
+<style>
+  .project-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+  }
+  
+  .project-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow);
+  }
+  
+  .project-card h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+  }
+  
+  .project-card p {
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+  
+  .project-link {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+    border-bottom: 2px solid transparent;
+    transition: border-color 0.2s ease;
+  }
+  
+  .project-link:hover {
+    border-bottom-color: var(--accent);
+  }
+  
+  @media (max-width: 480px) {
+    .project-card {
+      padding: 1rem;
+    }
+  }
+</style>

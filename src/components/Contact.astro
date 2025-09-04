@@ -1,0 +1,77 @@
+---
+// src/components/Contact.astro
+---
+
+<section class="contact" id="contact">
+    <h2 class="section-title">Get in Touch</h2>
+    <form class="contact-form" id="contact-form">
+      <input type="text" name="name" placeholder="Your Name" required>
+      <input type="email" name="email" placeholder="Email Address" required>
+      <input type="text" name="subject" placeholder="Subject" required>
+      <textarea name="message" placeholder="Your Message" required></textarea>
+      <button type="submit" class="button">Send Message</button>
+    </form>
+  </section>
+  
+  <style>
+    .contact {
+      padding: 4rem 2rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    .contact-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    
+    .contact-form input,
+    .contact-form textarea {
+      width: 100%;
+      padding: 0.8rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 1rem;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+    
+    .contact-form input:focus,
+    .contact-form textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    [data-theme="dark"] .contact-form input:focus,
+    [data-theme="dark"] .contact-form textarea:focus {
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+    }
+    
+    .contact-form textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+    
+    @media (max-width: 768px) {
+      .contact {
+        padding: 2rem 1rem;
+      }
+    }
+  </style>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('contact-form');
+      if (form) {
+        form.addEventListener('submit', (e) => {
+          e.preventDefault();
+          alert('Thank you for your message! We\'ll get back to you soon.');
+          form.reset();
+        });
+      }
+    });
+  </script>

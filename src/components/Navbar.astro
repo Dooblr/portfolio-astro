@@ -1,31 +1,216 @@
 ---
-// Navbar.astro
-// Minimal, accessible navbar that works without JS.
-// Import the navbar-specific stylesheet here so styles stay modular.
-import "../styles/navbar.css";
+// src/components/Navbar.astro
 ---
-<nav class="site-nav" role="navigation" aria-label="Main navigation">
+
+<nav class="site-nav">
   <a class="site-logo" href="/">Sugarfox Media</a>
-
-  <!-- Mobile toggle using details/summary for accessibility (no JS) -->
-  <details class="nav-toggle" aria-hidden="false">
-    <summary class="nav-toggle-summary" aria-label="Open menu">Menu</summary>
-
-    <ul class="nav-list nav-list-mobile">
-      <li><a href="/">Home</a></li>
-      <li><a href="/about">About</a></li>
-      <li><a href="/portfolio">Portfolio</a></li>
-      <li><a href="/contact" class="cta">Contact</a></li>
+  
+  <!-- Desktop Navigation -->
+  <div class="nav-desktop">
+    <ul class="nav-links">
+      <li><a href="#home">Home</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#portfolio">Services</a></li>
+      <li><a href="#contact">Contact</a></li>
     </ul>
-  </details>
-
-  <!-- Desktop links -->
-  <ul class="nav-list nav-list-desktop" role="menubar">
-    <li role="none"><a role="menuitem" href="/">Home</a></li>
-    <li role="none"><a role="menuitem" href="/about">About</a></li>
-    <li role="none"><a role="menuitem" href="/portfolio">Portfolio</a></li>
-    <li role="none"><a role="menuitem" href="/contact" class="cta">Contact</a></li>
-  </ul>
-  <button class="theme-toggle" id="theme-toggle">☾</button>
-  <script src="/theme-toggle.js" is:inline></script>
+    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+      ☾
+    </button>
+  </div>
+  
+  <!-- Mobile Navigation -->
+  <div class="nav-mobile">
+    <button class="theme-toggle" id="theme-toggle-mobile" aria-label="Toggle theme">
+      ☾
+    </button>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">
+      ☰
+    </button>
+  </div>
 </nav>
+
+<!-- Mobile Menu -->
+<div class="nav-menu" id="nav-menu">
+  <ul>
+    <li><a href="#home">Home</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#portfolio">Portfolio</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</div>
+
+<style>
+  .site-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: var(--nav-height);
+    padding: 0 2rem;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+  }
+  
+  .site-logo {
+    font-weight: 700;
+    color: var(--text);
+    text-decoration: none;
+    font-size: 1.2rem;
+    letter-spacing: -0.02em;
+  }
+  
+  .nav-desktop {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+  }
+  
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    list-style: none;
+  }
+  
+  .nav-links a {
+    position: relative;
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    padding: 0.5rem 0;
+    transition: color 0.2s ease;
+  }
+  
+  .nav-links a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.3s ease;
+  }
+  
+  .nav-links a:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+  
+  .cta {
+    background: var(--cta-bg) !important;
+    color: var(--cta-text) !important;
+    padding: 0.7rem 1.2rem;
+    border-radius: var(--radius);
+    font-weight: 600;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .cta::after {
+    display: none;
+  }
+  
+  .cta:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+  }
+  
+  .theme-toggle {
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    padding: 0.5rem;
+    border-radius: var(--radius);
+    font-size: 1.1rem;
+    transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .theme-toggle:hover {
+    background: var(--border);
+    transform: rotate(15deg);
+  }
+  
+  /* Mobile Navigation */
+  .nav-mobile {
+    display: none;
+  }
+  
+  .nav-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    color: var(--text);
+    font-size: 1.2rem;
+  }
+  
+  .nav-menu {
+    position: fixed;
+    top: var(--nav-height);
+    left: 0;
+    width: 100%;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    transform: translateY(-100%);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 99;
+  }
+  
+  .nav-menu.active {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  .nav-menu ul {
+    list-style: none;
+    padding: 1rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .nav-menu a {
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.7rem 0;
+    border-bottom: 1px solid var(--border);
+    transition: color 0.2s ease;
+  }
+  
+  .nav-menu a:hover {
+    color: var(--accent);
+  }
+  
+  @media (max-width: 768px) {
+    .nav-desktop {
+      display: none;
+    }
+    
+    .nav-mobile {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .site-nav {
+      padding: 0 1rem;
+    }
+  }
+</style>

@@ -1,0 +1,496 @@
+<!-- --- // src/components/Hero.astro --- -->
+<section class="hero" id="home">
+  <div class="ethereal-background">
+    <div class="light-strand strand-1"></div>
+    <div class="light-strand strand-2"></div>
+    <div class="light-strand strand-3"></div>
+    <div class="light-strand strand-4"></div>
+    <div class="light-strand strand-5"></div>
+    <div class="light-strand strand-6"></div>
+  </div>
+  
+  <!-- Three.js Canvas Container -->
+  <div id="three-container" class="three-container"></div>
+  
+  <div class="hero-content">
+    <h1>Creative Digital Solutions</h1>
+    <p>Crafting elegant digital experiences that make an impact.</p>
+    <div class="hero-actions">
+      <a href="#portfolio" class="button">View Services</a>
+      <a href="#contact" class="button button-outline">Get in Touch</a>
+    </div>
+  </div>
+</section>
+
+<script>
+import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+
+// Wait for DOM to be ready
+document.addEventListener('DOMContentLoaded', () => {
+  const container = document.getElementById('three-container');
+  if (!container) return;
+
+  // Scene setup
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+  const renderer = new THREE.WebGLRenderer({ 
+    antialias: true, 
+    alpha: true 
+  });
+  
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  renderer.setClearColor(0x000000, 0); // Transparent background
+  container.appendChild(renderer.domElement);
+
+  // Create cube geometry
+  const geometry = new THREE.BoxGeometry(1, 1, 1);
+  
+  // Create material with wireframe and transparent edges
+  const material = new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+    wireframe: true,
+    transparent: true,
+    opacity: 0.3
+  });
+  
+  const cube = new THREE.Mesh(geometry, material);
+  scene.add(cube);
+
+  // Add some subtle lighting effect with points
+  const points = [];
+  const pointGeometry = new THREE.SphereGeometry(0.02, 8, 8);
+  const pointMaterial = new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+    transparent: true,
+    opacity: 0.6
+  });
+
+  // Add points at cube vertices for extra visual interest
+  for (let i = 0; i < 8; i++) {
+    const point = new THREE.Mesh(pointGeometry, pointMaterial);
+    points.push(point);
+    scene.add(point);
+  }
+
+  // Position camera
+  camera.position.z = 3;
+
+  let time = 0;
+
+  // Animation function
+  function animate() {
+    requestAnimationFrame(animate);
+    
+    time += 0.005;
+    
+    // Rotate cube slowly
+    cube.rotation.x += 0.003;
+    cube.rotation.y += 0.005;
+    
+    // Animate cube scale subtly
+    const scale = 1 + Math.sin(time) * 0.1;
+    cube.scale.set(scale, scale, scale);
+    
+    // Update vertex points to follow cube corners
+    const vertices = [
+      [-0.5, -0.5, -0.5], [0.5, -0.5, -0.5],
+      [-0.5, 0.5, -0.5], [0.5, 0.5, -0.5],
+      [-0.5, -0.5, 0.5], [0.5, -0.5, 0.5],
+      [-0.5, 0.5, 0.5], [0.5, 0.5, 0.5]
+    ];
+    
+    vertices.forEach((vertex, i) => {
+      if (points[i]) {
+        const rotatedVertex = new THREE.Vector3(...vertex);
+        rotatedVertex.applyMatrix4(cube.matrix);
+        points[i].position.copy(rotatedVertex);
+        
+        // Subtle pulsing effect
+        points[i].material.opacity = 0.6 + Math.sin(time + i * 0.5) * 0.2;
+      }
+    });
+    
+    renderer.render(scene, camera);
+  }
+
+  // Handle window resize
+  function handleResize() {
+    if (!container) return;
+    
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+    
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    renderer.setSize(width, height);
+  }
+  
+  window.addEventListener('resize', handleResize);
+  
+  // Handle theme changes
+  function updateTheme() {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const opacity = isDark ? 0.5 : 0.3;
+    const pointOpacity = isDark ? 0.8 : 0.6;
+    
+    cube.material.opacity = opacity;
+    points.forEach(point => {
+      point.material.opacity = pointOpacity;
+    });
+  }
+  
+  // Listen for theme changes
+  const observer = new MutationObserver(updateTheme);
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-theme']
+  });
+  
+  // Initial theme setup
+  updateTheme();
+  
+  // Start animation
+  animate();
+  
+  // Cleanup function
+  window.addEventListener('beforeunload', () => {
+    observer.disconnect();
+    window.removeEventListener('resize', handleResize);
+    renderer.dispose();
+    geometry.dispose();
+    material.dispose();
+    pointGeometry.dispose();
+    pointMaterial.dispose();
+  });
+});
+</script>
+
+<style>
+.hero {
+  position: relative;
+  text-align: center;
+  padding: 4rem 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.ethereal-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.three-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 300px;
+  height: 300px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.light-strand {
+  position: absolute;
+  background: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.02) 0%,
+    rgba(255, 255, 255, 0.08) 25%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0.08) 75%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+  border-radius: 50px;
+  filter: blur(1px);
+}
+
+.strand-1 {
+  width: 300px;
+  height: 2px;
+  top: 20%;
+  left: -20%;
+  animation: drift-1 25s infinite ease-in-out;
+  opacity: 0.6;
+}
+
+.strand-2 {
+  width: 400px;
+  height: 1px;
+  top: 40%;
+  left: -15%;
+  animation: drift-2 30s infinite ease-in-out;
+  opacity: 0.4;
+  animation-delay: -5s;
+}
+
+.strand-3 {
+  width: 250px;
+  height: 3px;
+  top: 60%;
+  left: -10%;
+  animation: drift-3 35s infinite ease-in-out;
+  opacity: 0.3;
+  animation-delay: -10s;
+}
+
+.strand-4 {
+  width: 350px;
+  height: 1px;
+  top: 15%;
+  right: -20%;
+  animation: drift-4 28s infinite ease-in-out;
+  opacity: 0.5;
+  animation-delay: -3s;
+}
+
+.strand-5 {
+  width: 200px;
+  height: 2px;
+  top: 75%;
+  right: -15%;
+  animation: drift-5 32s infinite ease-in-out;
+  opacity: 0.4;
+  animation-delay: -8s;
+}
+
+.strand-6 {
+  width: 450px;
+  height: 1px;
+  top: 45%;
+  left: -25%;
+  animation: drift-6 40s infinite ease-in-out;
+  opacity: 0.2;
+  animation-delay: -15s;
+}
+
+@keyframes drift-1 {
+  0%, 100% { 
+    transform: translateX(0) translateY(0) rotate(0deg);
+    opacity: 0.6;
+  }
+  25% { 
+    transform: translateX(150px) translateY(-30px) rotate(5deg);
+    opacity: 0.8;
+  }
+  50% { 
+    transform: translateX(300px) translateY(20px) rotate(-3deg);
+    opacity: 0.4;
+  }
+  75% { 
+    transform: translateX(450px) translateY(-10px) rotate(2deg);
+    opacity: 0.7;
+  }
+}
+
+@keyframes drift-2 {
+  0%, 100% { 
+    transform: translateX(0) translateY(0) rotate(2deg);
+    opacity: 0.4;
+  }
+  33% { 
+    transform: translateX(200px) translateY(40px) rotate(-4deg);
+    opacity: 0.6;
+  }
+  66% { 
+    transform: translateX(400px) translateY(-20px) rotate(1deg);
+    opacity: 0.3;
+  }
+}
+
+@keyframes drift-3 {
+  0%, 100% { 
+    transform: translateX(0) translateY(0) rotate(-1deg);
+    opacity: 0.3;
+  }
+  20% { 
+    transform: translateX(100px) translateY(25px) rotate(3deg);
+    opacity: 0.5;
+  }
+  40% { 
+    transform: translateX(250px) translateY(-15px) rotate(-2deg);
+    opacity: 0.7;
+  }
+  60% { 
+    transform: translateX(350px) translateY(35px) rotate(4deg);
+    opacity: 0.4;
+  }
+  80% { 
+    transform: translateX(480px) translateY(-25px) rotate(-1deg);
+    opacity: 0.6;
+  }
+}
+
+@keyframes drift-4 {
+  0%, 100% { 
+    transform: translateX(0) translateY(0) rotate(3deg);
+    opacity: 0.5;
+  }
+  30% { 
+    transform: translateX(-180px) translateY(-35px) rotate(-2deg);
+    opacity: 0.7;
+  }
+  70% { 
+    transform: translateX(-350px) translateY(15px) rotate(1deg);
+    opacity: 0.3;
+  }
+}
+
+@keyframes drift-5 {
+  0%, 100% { 
+    transform: translateX(0) translateY(0) rotate(-2deg);
+    opacity: 0.4;
+  }
+  25% { 
+    transform: translateX(-120px) translateY(30px) rotate(4deg);
+    opacity: 0.6;
+  }
+  50% { 
+    transform: translateX(-280px) translateY(-20px) rotate(-3deg);
+    opacity: 0.5;
+  }
+  75% { 
+    transform: translateX(-400px) translateY(10px) rotate(1deg);
+    opacity: 0.3;
+  }
+}
+
+@keyframes drift-6 {
+  0%, 100% { 
+    transform: translateX(0) translateY(0) rotate(1deg);
+    opacity: 0.2;
+  }
+  20% { 
+    transform: translateX(150px) translateY(-40px) rotate(-3deg);
+    opacity: 0.4;
+  }
+  40% { 
+    transform: translateX(300px) translateY(25px) rotate(2deg);
+    opacity: 0.6;
+  }
+  60% { 
+    transform: translateX(450px) translateY(-15px) rotate(-1deg);
+    opacity: 0.3;
+  }
+  80% { 
+    transform: translateX(600px) translateY(35px) rotate(4deg);
+    opacity: 0.5;
+  }
+}
+
+.hero-content {
+  position: relative;
+  z-index: 10;
+}
+
+.hero-content h1 {
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  letter-spacing: -0.02em;
+}
+
+.hero-content p {
+  font-size: 1.2rem;
+  color: var(--muted);
+  margin-bottom: 2rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .hero {
+    padding: 2rem 1rem;
+    min-height: 50vh;
+  }
+  
+  .three-container {
+    width: 200px;
+    height: 200px;
+  }
+  
+  .hero-content h1 {
+    font-size: 2rem;
+  }
+  
+  .hero-content p {
+    font-size: 1rem;
+  }
+  
+  .hero-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .hero-actions .button {
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  /* Reduce strand complexity on mobile */
+  .strand-4, .strand-5, .strand-6 {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-content h1 {
+    font-size: 1.8rem;
+  }
+  
+  .three-container {
+    width: 150px;
+    height: 150px;
+  }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .light-strand {
+    animation-duration: 120s;
+    opacity: 0.7;
+  }
+  
+  .three-container {
+    display: none;
+  }
+}
+
+/* Dark mode adjustments - Use bright strands for contrast */
+[data-theme="dark"] .light-strand {
+  background: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.15) 25%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0.15) 75%,
+    rgba(255, 255, 255, 0.08) 100%
+  );
+  filter: blur(0.8px);
+}
+
+/* Enhanced visibility on dark mode */
+[data-theme="dark"] .strand-1 { opacity: 0.9; }
+[data-theme="dark"] .strand-2 { opacity: 0.7; }
+[data-theme="dark"] .strand-3 { opacity: 0.6; }
+[data-theme="dark"] .strand-4 { opacity: 0.8; }
+[data-theme="dark"] .strand-5 { opacity: 0.7; }
+[data-theme="dark"] .strand-6 { opacity: 0.5; }
+</style>
