@@ -1,11 +1,13 @@
 // src/scripts/theme-toggle.js
 
-// Theme toggle functionality (using in-memory state)
+// Global theme state
 let currentTheme = 'light';
 const root = document.documentElement;
 
+// Theme update function
 function updateTheme(theme) {
   currentTheme = theme;
+  
   if (theme === 'dark') {
     root.setAttribute('data-theme', 'dark');
     updateToggleButtons('☀');
@@ -14,8 +16,10 @@ function updateTheme(theme) {
     updateToggleButtons('☾');
   }
   
-  // Trigger custom event for Three.js components to listen to
-  window.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme } }));
+  // Dispatch event for Three.js components to listen to
+  window.dispatchEvent(new CustomEvent('themeChanged', { 
+    detail: { theme, isDark: theme === 'dark' } 
+  }));
 }
 
 function updateToggleButtons(icon) {
@@ -34,9 +38,10 @@ function toggleTheme() {
 }
 
 function initializeTheme() {
-  // Set initial theme
+  // Set initial theme to light
   updateTheme('light');
   
+  // Add event listeners to all theme toggle buttons
   const toggleBtns = [
     document.getElementById('theme-toggle'),
     document.getElementById('theme-toggle-mobile')
@@ -44,7 +49,10 @@ function initializeTheme() {
   
   toggleBtns.forEach(btn => {
     if (btn) {
-      btn.addEventListener('click', toggleTheme);
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        toggleTheme();
+      });
     }
   });
 
@@ -86,7 +94,13 @@ function initializeTheme() {
 }
 
 // Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', initializeTheme);
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeTheme);
+} else {
+  // DOM is already loaded
+  initializeTheme();
+}
 
-// Export for potential use in other scripts
+// Export functions for global access
 window.toggleTheme = toggleTheme;
+window.getCurrentTheme = () => currentTheme;
